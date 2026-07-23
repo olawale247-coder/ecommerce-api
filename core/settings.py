@@ -34,9 +34,10 @@ CSR_TRUSTED_ORIGINS = ['https://ecommerce-api-qk6s.onrender.com']
 import os
 
 ALLOWED_HOSTS = [
+    'ecommerce-api-qk6s.onrender.com',
+    '127.0.0.1',
     'localhost',
-    '127.0.0.1'
-    'ecommerce-api-qk6s.onrender.com'
+    
 ]
 
 
