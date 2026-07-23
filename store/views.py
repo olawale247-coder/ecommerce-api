@@ -27,15 +27,21 @@ class CartViewSet(viewsets.ModelViewSet):
         product_id = request.data.get('product_id')
         quantity = request.data.get('quantity', 1)
 
-        product = Product.objects.get(id=product_id)
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return Response({'error': 'Product not found'}, status=404)
+            
         cart, _ = Cart.objects.get_or_create(user=request.user)
 
         cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+
         if not created:
             cart_item.quantity += int(quantity)
-        else:
-            cart_item.quantity = int(quantity)
+
+
+        cart_item.quantity = max(cart_item.quantity, quantity)  # Ensure quantity is at least the requested amount
         cart_item.save()
 
-        return Response({'message': 'Product added to cart successfully'})
+        return Response({'message': 'Product added to cart successfully'}, status=200)
 
