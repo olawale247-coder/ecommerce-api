@@ -1,7 +1,8 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-from .models import Product, Category
-from .serializers import ProductSerializer, CategorySerializer
+from .models import Product, Category, Cart, CartItem, Order
+from .serializers import ProductSerializer, CategorySerializer, CartSerializer, CartItemSerializer, OrderSerializer
+from rest_framework.response import Response
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -12,3 +13,29 @@ class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     #permission_classes = [IsAuthenticated]
+
+class CartViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request):
+        cart, _ = Cart.objects.get_or_create(user=request.user)
+        items = CartItem.objects.filter(cart=cart)
+        serializer = CartItemSerializer(items, many=True)
+        return Response(serializer.data)
+
+    def add(self, request):
+        product_id = request.data.get('product_id')
+        quantity = request.data.get('quantity', 1)
+
+        product = Product.objects.get(id=product_id)
+        cart, _ = Cart.objects.get_or_create(user=request.user)
+
+        cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+        if not created:
+            cart_item.quantity += int(quantity)
+        else:
+            cart_item.quantity = int(quantity)
+        cart_item.save()
+
+        return Response({'message': 'Product added to cart successfully'})
+

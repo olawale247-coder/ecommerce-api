@@ -2,8 +2,9 @@
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from store.views import ProductViewSet, CategoryViewSet
+from store.views import ProductViewSet, CategoryViewSet, CartViewSet
 from store.auth_views import RegisterView
+
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.http import JsonResponse, request
 
@@ -28,6 +29,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', api_root),
     path('api/', include(router.urls)),
+    path('api/cart/', CartViewSet.as_view({'get': 'list', 'post': 'add'}), name='cart'),
     path('api/auth/register/', RegisterView.as_view(), name='register'),
     path('api/auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
